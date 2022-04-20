@@ -1,0 +1,56 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(dplyr)
+library(ggplot2)
+```
+
+# Transcript of the French presidential TV Debate
+
+This is a provisory transcript of the debate opposing Marine Le Pen and Emmanuel Macron between the two rounds of the 2022 French presidential election (April, 21 2022). 
+
+I plan on using the replay to fill the missing part soon. 
+
+The data was collected live, which explains minor errors in the data: 
+  
+  + The scraper started collecting data six minutes after the debate started
+  + The scraper broke twice and did not collected data for periods of 2 minutes
+  + Some sentences are missing, because the subtitle vanished so fast that it could not be collected by the scraper
+
+
+
+```{r}
+readr::read_rds("data/2022_debat_second_tour.rds") %>%
+  dplyr::glimpse()
+```
+
+
+```{r}
+readLines("data/2022_debat_second_tour.txt")[1:5]
+```
+
+
+```{r}
+readr::read_rds("data/2022_debat_second_tour.rds") %>%
+  dplyr::mutate(n_words = stringr::str_count(text, "\\s")) %>% 
+  dplyr::group_by(speaker, m5 = lubridate::floor_date(stamp, "10 minutes")) %>%
+  dplyr::summarise(sum = sum(n_words)) %>%
+  ggplot(aes(x = m5, sum, color = speaker)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x = "Time", y = "Number of spoken words per 5 minutes")
+
+```
+
+
+
+
